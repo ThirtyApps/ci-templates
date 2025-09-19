@@ -17,12 +17,13 @@ on:
       VPS_HOST:   { required: true }
       VPS_USER:   { required: true }
       VPS_SSH_KEY: { required: true }
-      GHCR_USER:  { required: true }
-      GHCR_PAT:   { required: true }
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
       - name: Check if rebuild needed
@@ -36,7 +37,7 @@ jobs:
           fi
       - name: Login to GHCR for push
         if: steps.check.outputs.rebuild == 'true'
-        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ secrets.GHCR_USER }} --password-stdin
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Build and push PHP-FPM image
         if: steps.check.outputs.rebuild == 'true'
         run: |
