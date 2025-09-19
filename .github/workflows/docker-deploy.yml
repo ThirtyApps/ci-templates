@@ -86,7 +86,18 @@ jobs:
             else
               echo "Code-only change, updating files..."
               cd "$BASE/$SITE"
-              git pull origin $BRANCH
+              
+              # Initialize git if not already a repository
+              if [ ! -d ".git" ]; then
+                echo "Initializing git repository..."
+                git init
+                git remote add origin https://github.com/ThirtyApps/$SITE.git
+                git fetch origin
+                git checkout -b $BRANCH origin/$BRANCH
+              else
+                git pull origin $BRANCH
+              fi
+              
               # Restart PHP container to pick up code changes
               cd "compose/$STACK"
               docker compose restart php
